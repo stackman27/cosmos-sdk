@@ -7,7 +7,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/x/nft"
 )
 
-// Mint defines a method for minting a new nft
+// Mint defines a method for minting a new nft (Make this function actually importable)
 func (k Keeper) Mint(ctx sdk.Context, token nft.NFT, receiver sdk.AccAddress) error {
 	if !k.HasClass(ctx, token.ClassId) {
 		return sdkerrors.Wrap(nft.ErrClassNotExists, token.ClassId)
