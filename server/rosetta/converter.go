@@ -7,11 +7,11 @@ import (
 	"reflect"
 
 	"cosmossdk.io/math"
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/btcsuite/btcd/btcec/v2"
 	rosettatypes "github.com/coinbase/rosetta-sdk-go/types"
 	abci "github.com/tendermint/tendermint/abci/types"
 	"github.com/tendermint/tendermint/crypto"
-	tmcoretypes "github.com/tendermint/tendermint/rpc/coretypes"
+	tmcoretypes "github.com/tendermint/tendermint/rpc/core/types"
 	tmtypes "github.com/tendermint/tendermint/types"
 
 	sdkclient "github.com/cosmos/cosmos-sdk/client"
@@ -31,9 +31,9 @@ import (
 // Converter is a utility that can be used to convert
 // back and forth from rosetta to sdk and tendermint types
 // IMPORTANT NOTES:
-// - IT SHOULD BE USED ONLY TO DEAL WITH THINGS
-//   IN A STATELESS WAY! IT SHOULD NEVER INTERACT DIRECTLY
-//   WITH TENDERMINT RPC AND COSMOS GRPC
+//   - IT SHOULD BE USED ONLY TO DEAL WITH THINGS
+//     IN A STATELESS WAY! IT SHOULD NEVER INTERACT DIRECTLY
+//     WITH TENDERMINT RPC AND COSMOS GRPC
 //
 // - IT SHOULD RETURN cosmos rosetta gateway error types!
 type Converter interface {
@@ -558,9 +558,9 @@ func (c converter) Peers(peers []tmcoretypes.Peer) []*rosettatypes.Peer {
 
 	for i, peer := range peers {
 		converted[i] = &rosettatypes.Peer{
-			PeerID: string(peer.ID),
+			PeerID: peer.NodeInfo.Moniker,
 			Metadata: map[string]interface{}{
-				"addr": peer.URL,
+				"addr": peer.NodeInfo.ListenAddr,
 			},
 		}
 	}
@@ -649,7 +649,7 @@ func (c converter) PubKey(pubKey *rosettatypes.PublicKey) (cryptotypes.PubKey, e
 		return nil, crgerrs.WrapError(crgerrs.ErrUnsupportedCurve, "only secp256k1 supported")
 	}
 
-	cmp, err := btcec.ParsePubKey(pubKey.Bytes, btcec.S256())
+	cmp, err := btcec.ParsePubKey(pubKey.Bytes)
 	if err != nil {
 		return nil, crgerrs.WrapError(crgerrs.ErrBadArgument, err.Error())
 	}
